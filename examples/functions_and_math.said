@@ -1,0 +1,18 @@
+// -------------------------------------------------------------
+// Functions and Actions in SaidLang
+// -------------------------------------------------------------
+
+to calculate_total with price and tax_rate:
+    set total to price + (price * tax_rate)
+    give back total
+
+to greet_user with user_name:
+    show "Welcome back, " + user_name + "!"
+
+greet_user("Alex")
+
+set item_price to 100
+set tax to 0.15
+
+set final_price to calculate_total(item_price, tax)
+show "Final calculated price: $" + str(final_price)
