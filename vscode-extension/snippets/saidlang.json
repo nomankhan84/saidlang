@@ -1,0 +1,75 @@
+{
+  "Show Output": {
+    "prefix": "show",
+    "body": ["show \"${1:Hello, World!}\""],
+    "description": "Output message to console"
+  },
+  "Variable Assignment": {
+    "prefix": "set",
+    "body": ["set ${1:variable_name} to ${2:\"value\"}"],
+    "description": "Set a variable"
+  },
+  "If Condition": {
+    "prefix": "if",
+    "body": [
+      "if ${1:condition}:",
+      "    ${2:show \"Condition met\"}",
+      "otherwise:",
+      "    ${3:show \"Otherwise\"}"
+    ],
+    "description": "If / Otherwise condition block"
+  },
+  "Repeat Loop": {
+    "prefix": "repeat",
+    "body": [
+      "repeat ${1:5} times with ${2:i}:",
+      "    ${3:show \"Index: \" + str(${2:i})}"
+    ],
+    "description": "Repeat loop block"
+  },
+  "Count Loop": {
+    "prefix": "count",
+    "body": [
+      "count from ${1:1} to ${2:10} as ${3:i}:",
+      "    ${4:show ${3:i}}"
+    ],
+    "description": "Count from start to end"
+  },
+  "For Each Loop": {
+    "prefix": "foreach",
+    "body": [
+      "for each ${1:item} in ${2:collection}:",
+      "    ${3:show ${1:item}}"
+    ],
+    "description": "For each loop over a collection"
+  },
+  "Function Definition": {
+    "prefix": "fn",
+    "body": [
+      "to ${1:function_name} with ${2:param}:",
+      "    ${3:// code here}",
+      "    give back ${4:result}"
+    ],
+    "description": "Define a function / action"
+  },
+  "Try Catch (Attempt Error)": {
+    "prefix": "attempt",
+    "body": [
+      "attempt:",
+      "    ${1:// risky code}",
+      "on error as ${2:err}:",
+      "    show \"Error: \" + str(${2:err})"
+    ],
+    "description": "Attempt block with error handling"
+  },
+  "File Write": {
+    "prefix": "writefile",
+    "body": ["write ${1:\"content\"} into file \"${2:filename.txt}\""],
+    "description": "Write text into a file"
+  },
+  "File Read": {
+    "prefix": "readfile",
+    "body": ["read file \"${1:filename.txt}\" into ${2:content}"],
+    "description": "Read file into variable"
+  }
+}

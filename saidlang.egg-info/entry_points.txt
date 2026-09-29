@@ -1,0 +1,2 @@
+[console_scripts]
+said = saidlang.cli:main

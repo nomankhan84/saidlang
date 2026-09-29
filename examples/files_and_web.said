@@ -1,0 +1,31 @@
+// -------------------------------------------------------------
+// Advanced Features: Files, Random, Strings, and Error Handling
+// -------------------------------------------------------------
+
+show "=== 1. Writing and Reading Files ==="
+set sample_file to "hello_said.txt"
+write "SaidLang wrote this message into a file!" into file sample_file
+
+read file sample_file into file_content
+show "Read from file: " + file_content
+
+show "\n=== 2. Random Numbers & Lucky Picks ==="
+random number between 10 and 50 into lucky_number
+show "Your lucky number today: " + str(lucky_number)
+
+create list flavors
+add "Chocolate" to flavors
+add "Vanilla" to flavors
+add "Strawberry" to flavors
+add "Mango" to flavors
+
+pick random from flavors into my_flavor
+show "Random ice cream flavor: " + my_flavor
+
+show "\n=== 3. Friendly Error Handling ==="
+attempt:
+    show "Dividing 100 by 10: " + str(100 / 10)
+    // Attempting something risky
+    set bad_math to 10 / 0
+on error as err:
+    show "Caught error safely: " + str(err)

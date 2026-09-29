@@ -1,0 +1,43 @@
+{
+  "name": "saidlang",
+  "displayName": "SaidLang - Ultra Human-Friendly Language",
+  "description": "Syntax highlighting, snippets, and language support for SaidLang (.said files)",
+  "version": "0.1.0",
+  "publisher": "said",
+  "icon": "icon.png",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "saidlang",
+        "aliases": ["SaidLang", "saidlang", "said"],
+        "extensions": [".said"],
+        "firstLine": "^(//|#|note:)?.*\\b(SaidLang|show|say|set\\s+\\w+\\s+to|define|to\\s+\\w+\\s+with)\\b",
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./icon.png",
+          "dark": "./icon.png"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "saidlang",
+        "scopeName": "source.said",
+        "path": "./syntaxes/saidlang.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "saidlang",
+        "path": "./snippets/saidlang.json"
+      }
+    ]
+  }
+}

@@ -1,0 +1,12 @@
+README.md
+setup.py
+saidlang/__init__.py
+saidlang/cli.py
+saidlang/hook.py
+saidlang/runtime.py
+saidlang/transpiler.py
+saidlang.egg-info/PKG-INFO
+saidlang.egg-info/SOURCES.txt
+saidlang.egg-info/dependency_links.txt
+saidlang.egg-info/entry_points.txt
+saidlang.egg-info/top_level.txt
