@@ -111,6 +111,7 @@ def main():
     parser = argparse.ArgumentParser(
         description="SaidLang - Ultra human-friendly programming language transpiled to Python."
     )
+    parser.add_argument("--version", "-v", action="version", version="SaidLang v0.1.0")
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # Run command

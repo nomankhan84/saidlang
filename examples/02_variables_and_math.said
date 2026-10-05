@@ -1,0 +1,20 @@
+# ==========================================
+# SaidLang Tutorial 02: Variables & Math
+# ==========================================
+
+# Different human ways to define variables:
+set score to 100
+let playerName be "Said"
+make health = 100
+
+# Arithmetic operations
+increase score by 25
+decrease health by 10
+
+# Displaying variables
+show "Player:"
+show playerName
+show "Score:"
+show score
+show "Health:"
+show health

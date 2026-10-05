@@ -1,0 +1,15 @@
+# ==========================================
+# SaidLang Tutorial 05: Functions
+# ==========================================
+
+to greet with name:
+    show "Hello, " + name + "!"
+
+to calculate_area with width and height:
+    give back width * height
+
+greet("Developer")
+
+set area to calculate_area(5, 10)
+show "Area of rectangle (5x10):"
+show area

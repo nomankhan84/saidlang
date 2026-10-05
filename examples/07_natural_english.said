@@ -1,0 +1,22 @@
+# ==========================================
+# SaidLang Tutorial 07: Natural English Syntax
+# ==========================================
+
+# 1. Defining variables in pure English (in both directions)
+save name as Noman as string
+save 17 in age as integer
+
+# 2. String interpolation with @ variable reference & possessive properties
+save Red Mustang in rohan's car as string
+save Blue Sedan in sohan's car as string
+
+say @name drives @rohan's car and friend drives @sohan's car
+
+# 3. Dynamic repeats using variable count
+save 3 in count as integer
+repeat learning saidlang is fun @count times
+
+# 4. Plain English comparison logic
+save rohan's age as 15 as integer and mohan's age as 16 as integer
+
+if rohan's age is bigger than mohan's age then say rohan is older else say mohan is older

@@ -122,6 +122,19 @@ def text_ends_with(text, sub):
 def split_text(text, sep=" "):
     return str(text).split(str(sep))
 
+def is_empty(text):
+    return len(str(text).strip()) == 0
+
+def is_numeric(val):
+    try:
+        float(val)
+        return True
+    except (ValueError, TypeError):
+        return False
+
+def capitalize_text(text):
+    return str(text).capitalize()
+
 def length_of(item):
     return len(item)
 

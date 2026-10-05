@@ -1,0 +1,14 @@
+# ==========================================
+# SaidLang Tutorial 06: File Operations
+# ==========================================
+
+show "Writing to file..."
+write "Hello from SaidLang file system!" into file "sample.txt"
+
+show "Reading from file..."
+read file "sample.txt" into content
+show "File Content:"
+show content
+
+show "Appending to file..."
+append "\nAppended line." to file "sample.txt"

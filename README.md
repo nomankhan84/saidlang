@@ -172,15 +172,15 @@ We welcome contributions from the open-source community! Whether you are fixing 
 
 4. **Set Up the Environment**
    ```bash
-   pip install -e .
+   pip install -e ".[dev]"
    ```
 
 5. **Implement Changes & Add Tests**
    - Follow clean Python formatting conventions (PEP 8).
-   - Add new test cases in `test_saidlang.py` for any new syntax features or bug fixes.
-   - Run the test suite to ensure all tests pass:
+   - Add new test cases in `tests/` for any new syntax features or bug fixes.
+   - Run the test suite:
      ```bash
-     python -m unittest test_saidlang.py
+     pytest tests/ -v
      ```
 
 6. **Commit & Push**
@@ -193,29 +193,53 @@ We welcome contributions from the open-source community! Whether you are fixing 
 7. **Submit a Pull Request**
    Open a Pull Request on the main repository describing your changes and referencing any related issues.
 
-### Reporting Issues
-
-- Found a bug or syntax edge-case? Open an issue on [GitHub Issues](https://github.com/nomankhan84/saidlang/issues).
-- Provide a minimal reproducible `.said` snippet along with expected vs. actual behavior.
-
 ---
 
 ## 📂 Repository Structure
 
-```
+```plaintext
 saidlang/
-├── assets/                  # Logos and graphical assets
-├── examples/                # Ready-to-run SaidLang scripts
-├── saidlang/                # Core package
-│   ├── __init__.py          # Package initialization
-│   ├── cli.py               # Command-line interface logic
-│   └── transpiler.py        # Grammar parser and transpilation engine
-├── vscode-extension/        # Visual Studio Code syntax extension
-├── test_saidlang.py         # Test suite
-├── install_extension.py     # Automated extension installer
-├── setup.py                 # Package setup and metadata
-├── SYNTAX_GUIDE.md          # Full language syntax reference
-└── README.md                # Project documentation
+├── .github/                       # GitHub Actions CI/CD and issue templates
+│   ├── workflows/
+│   │   ├── ci.yml                 # Cross-platform multi-Python CI matrix
+│   │   └── release.yml            # Automated PyPI & VS Code release pipeline
+│   ├── ISSUE_TEMPLATE/
+│   │   ├── bug_report.md
+│   │   └── feature_request.md
+│   └── PULL_REQUEST_TEMPLATE.md
+├── docs/                          # In-depth architectural & syntax docs
+│   ├── ARCHITECTURE.md            # Transpiler engine pipeline details
+│   └── SPECIFICATION.md           # Formal syntax and keyword dictionary
+├── examples/                      # Canonical, progressive tutorial programs
+│   ├── 01_hello_world.said
+│   ├── 02_variables_and_math.said
+│   ├── 03_control_flow.said
+│   ├── 04_loops_and_lists.said
+│   ├── 05_functions.said
+│   ├── 06_file_and_web.said
+│   └── 07_natural_english.said
+├── saidlang/                      # Core engine package
+│   ├── __init__.py                # Package exports & version
+│   ├── cli.py                     # CLI entrypoint (said run, build, repl)
+│   ├── hook.py                    # Native Python import hook (.said modules)
+│   ├── runtime.py                 # Standard library runtime helpers
+│   └── transpiler.py              # Parsing & code generation engine
+├── tests/                         # Comprehensive test suite
+│   ├── __init__.py
+│   ├── test_cli.py
+│   ├── test_examples.py
+│   ├── test_pure_english.py
+│   ├── test_runtime.py
+│   └── test_transpiler.py
+├── vscode-extension/              # Editor tooling & syntax highlighting
+├── .gitignore                     # Production Python & editor ignore rules
+├── CHANGELOG.md                   # Version tracking & release notes
+├── CODE_OF_CONDUCT.md             # Contributor Covenant standard
+├── CONTRIBUTING.md                # Development, test running, & PR guidelines
+├── pyproject.toml                 # PEP 517/621 packaging metadata
+├── README.md                      # Project documentation
+├── SECURITY.md                    # Security vulnerability policy
+└── SYNTAX_GUIDE.md                # Language syntax reference
 ```
 
 ---

@@ -1,0 +1,12 @@
+# ==========================================
+# SaidLang Tutorial 03: Control Flow
+# ==========================================
+
+set age to 20
+
+if age is greater than 18:
+    show "You are eligible to vote!"
+otherwise if age is equal to 18:
+    show "Just became eligible!"
+otherwise:
+    show "You are not yet eligible."

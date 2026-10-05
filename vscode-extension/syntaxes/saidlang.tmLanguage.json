@@ -4,8 +4,9 @@
   "scopeName": "source.said",
   "patterns": [
     { "include": "#comments" },
-    { "include": "#strings" },
     { "include": "#at_variables" },
+    { "include": "#possessive_variables" },
+    { "include": "#strings" },
     { "include": "#constants" },
     { "include": "#types" },
     { "include": "#math_keywords" },
@@ -35,7 +36,19 @@
       "patterns": [
         {
           "name": "variable.other.readwrite.said",
-          "match": "@[a-zA-Z_][\\w'’]*"
+          "match": "@[a-zA-Z_][\\w]*(?:['’]s\\s+[a-zA-Z_]\\w*|['’]s)?"
+        }
+      ]
+    },
+    "possessive_variables": {
+      "patterns": [
+        {
+          "name": "variable.other.readwrite.said",
+          "match": "\\b[a-zA-Z_][\\w]*['’]s\\s+[a-zA-Z_]\\w*\\b"
+        },
+        {
+          "name": "variable.other.readwrite.said",
+          "match": "\\b[a-zA-Z_][\\w]*['’]s\\b"
         }
       ]
     },
@@ -54,7 +67,7 @@
         },
         {
           "name": "string.quoted.single.said",
-          "begin": "'",
+          "begin": "(?<![a-zA-Z0-9_])'",
           "end": "'",
           "patterns": [
             {
@@ -109,7 +122,7 @@
         },
         {
           "name": "keyword.control.loop.said",
-          "match": "\\b(repeat|while|times|with|count from|step|as|for each|in|stop loop|break|skip to next|continue)\\b"
+          "match": "\\b(repeat|while|times|with|count from|step|as|for each|in|stop loop|break|skip to next|continue|do|done|finish)\\b"
         },
         {
           "name": "keyword.control.trycatch.said",
@@ -125,7 +138,7 @@
       "patterns": [
         {
           "name": "keyword.other.said",
-          "match": "\\b(save|store|set|make|let|remember|to|be|as|into|from|and|by)\\b"
+          "match": "\\b(save|store|set|make|let|remember|to|be|as|in|into|from|and|by)\\b"
         },
         {
           "name": "entity.name.function.io.said",
@@ -145,7 +158,7 @@
       "patterns": [
         {
           "name": "keyword.operator.comparison.said",
-          "match": "\\b(is greater than or equal to|is less than or equal to|is bigger than or equal to|is smaller than or equal to|is bigger than|is smaller than|is greater than|is less than|is not equal to|is not same as|is different from|is equal to|is same as|is exactly|is not|is|has)\\b"
+          "match": "\\b(is greater than or equal to|is less than or equal to|is bigger than or equal to|is smaller than or equal to|is bigger than|is smaller than|is greater than|is less than|is elder than|is older than|is younger than|is not equal to|is not same as|is different from|is equal to|is same as|is exactly|is not|is|has)\\b"
         },
         {
           "name": "keyword.operator.arithmetic.said",

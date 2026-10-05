@@ -1,0 +1,7 @@
+# ==========================================
+# SaidLang Tutorial 01: Hello World
+# ==========================================
+
+# Use 'show' or 'say' to print output to the terminal
+show "Hello, World from SaidLang!"
+say "Programming in pure, readable human language."

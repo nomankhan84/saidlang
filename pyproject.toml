@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "saidlang"
+version = "0.1.0"
+description = "An ultra human-friendly, natural-syntax programming language that transpiles to Python."
+readme = "README.md"
+authors = [
+  { name = "Saidlang Contributors" }
+]
+license = { text = "MIT" }
+requires-python = ">=3.8"
+keywords = [
+  "programming-language",
+  "transpiler",
+  "human-friendly",
+  "natural-language",
+  "python",
+  "compiler"
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Education",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Software Development :: Compilers",
+  "Topic :: Software Development :: Interpreters",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7.0.0",
+  "pytest-cov>=4.0.0",
+  "ruff>=0.1.0",
+  "build>=1.0.0",
+  "twine>=4.0.0",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/nomankhan84/saidlang"
+"Bug Tracker" = "https://github.com/nomankhan84/saidlang/issues"
+"Documentation" = "https://github.com/nomankhan84/saidlang#readme"
+
+[project.scripts]
+said = "saidlang.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["saidlang*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]

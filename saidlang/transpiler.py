@@ -14,6 +14,9 @@ OPERATOR_MAP = [
     (r"\bis smaller than\b", "<"),
     (r"\bis greater than\b", ">"),
     (r"\bis less than\b", "<"),
+    (r"\bis elder than\b", ">"),
+    (r"\bis older than\b", ">"),
+    (r"\bis younger than\b", "<"),
     (r"\bis not equal to\b", "!="),
     (r"\bis not same as\b", "!="),
     (r"\bis different from\b", "!="),
@@ -71,8 +74,8 @@ def clean_expr_tokens(expr):
     expr = expr.strip()
     for pattern, replacement in OPERATOR_MAP:
         expr = re.sub(pattern, replacement, expr, flags=re.IGNORECASE)
-    # Convert @var to var
-    expr = re.sub(r'@([a-zA-Z_][\w\'’]*)', lambda m: sanitize_var_name(m.group(1)), expr)
+    # Convert @var or @rohan's car to var
+    expr = re.sub(r'@([a-zA-Z_][\w]*(?:[\'’]s\s+[a-zA-Z_]\w*|[\'’]s)?)', lambda m: sanitize_var_name(m.group(1)), expr)
     return expr
 
 def parse_natural_say(content):
@@ -82,6 +85,7 @@ def parse_natural_say(content):
       say @name -> show(name)
       say 42 -> show(42)
       say hello @name, you are @age years old -> show(f"hello {name}, you are {age} years old")
+      say @name drives @name's car -> show(f"{name} drives {name_s_car}")
       say "quoted string" -> show("quoted string")
     """
     content = content.strip()
@@ -89,7 +93,7 @@ def parse_natural_say(content):
         return "show()"
 
     # Single @var reference without extra words
-    if re.match(r'^@[\w\'’]+$', content):
+    if re.match(r'^@[a-zA-Z_][\w]*(?:[\'’]s\s+[a-zA-Z_]\w*|[\'’]s)?$', content):
         var = sanitize_var_name(content)
         return f"show({var})"
 
@@ -106,61 +110,159 @@ def parse_natural_say(content):
         v = sanitize_var_name(m.group(1))
         return "{" + v + "}"
 
-    fstring_body = re.sub(r'@([a-zA-Z_][\w\'’]*)', replace_var, content)
+    fstring_body = re.sub(r'@([a-zA-Z_][\w]*(?:[\'’]s\s+[a-zA-Z_]\w*|[\'’]s)?)', replace_var, content)
     fstring_body = fstring_body.replace('"', '\\"')
 
     if "{" in fstring_body:
         return f'show(f"{fstring_body}")'
     return f'show("{fstring_body}")'
 
+def _format_typed_assignment(var, val, cast):
+    cast = (cast or "").lower()
+    # Type casting & normalization
+    if cast in ("string", "text", "str"):
+        if not (val.startswith('"') or val.startswith("'")):
+            val = f'"{val}"'
+    elif cast in ("integer", "int"):
+        val = f"int({clean_expr_tokens(val)})"
+    elif cast in ("float", "decimal", "number"):
+        val = f"float({clean_expr_tokens(val)})"
+    elif cast in ("boolean", "bool"):
+        if val.lower() in ("true", "yes"):
+            val = "True"
+        elif val.lower() in ("false", "no"):
+            val = "False"
+        else:
+            val = f"bool({clean_expr_tokens(val)})"
+    elif cast in ("list", "array"):
+        if not (val.startswith("[") and val.endswith("]")):
+            val = f"[{val}]"
+    elif cast in ("dict", "dictionary", "object"):
+        if not (val.startswith("{") and val.endswith("}")):
+            val = f"{{{val}}}"
+    elif cast == "tuple":
+        if not (val.startswith("(") and val.endswith(")")):
+            val = f"({val})"
+    elif cast == "set":
+        if not (val.startswith("{") and val.endswith("}")):
+            val = f"set([{val}])"
+    else:
+        if re.match(r'^-?\d+(?:\.\d+)?$', val) or val in ("True", "False", "None"):
+            val = val
+        elif val.startswith('"') or val.startswith("'"):
+            val = val
+        elif val.startswith("@"):
+            val = sanitize_var_name(val)
+        else:
+            cleaned = clean_expr_tokens(val)
+            if any(op in cleaned for op in ("+", "-", "*", "/", "%", "**")):
+                val = cleaned
+            elif not re.match(r'^[a-zA-Z_]\w*$', val):
+                val = f'"{val}"'
+            else:
+                val = cleaned
+
+    return f"{var} = {val}"
+
 def parse_save_assignment_chunk(chunk):
     """
-    Parses assignment expressions like:
-      'name as noman as string'
+    Parses assignment expressions in both directions:
+      'save name as noman as string'
+      'save 5 in number as integer'
+      'save Red Mustang in rohan's car as string'
       'age as 17 as integer'
-      'price as 19.99 as float'
-      'is_active as true as boolean'
-      'scores as [10, 20, 30] as list'
-      'profile as {"role": "dev"} as dict'
     """
     chunk = chunk.strip()
-    match = re.match(r'^(?:save|store|set)?\s*(.+?)\s+as\s+(.+?)(?:\s+as\s+(string|text|str|integer|int|number|float|decimal|boolean|bool|list|array|dict|dictionary|object|tuple|set))?$', chunk, re.IGNORECASE)
-    if match:
-        raw_var = match.group(1).strip()
-        val = match.group(2).strip()
-        cast = (match.group(3) or "").lower()
 
+    # Direction 1: save <val> in <var> [as <type>]
+    match_in = re.match(r'^(?:save|store)?\s*(.+?)\s+in\s+([a-zA-Z_][\w\'’]*(?:\s+[a-zA-Z_]\w*)?)(?:\s+as\s+(string|text|str|integer|int|number|float|decimal|boolean|bool|list|array|dict|dictionary|object|tuple|set))?$', chunk, re.IGNORECASE)
+    if match_in:
+        val = match_in.group(1).strip()
+        raw_var = match_in.group(2).strip()
+        cast = (match_in.group(3) or "").lower()
         var = sanitize_var_name(raw_var)
+        return _format_typed_assignment(var, val, cast)
 
-        # Type casting & normalization
-        if cast in ("string", "text", "str"):
-            if not (val.startswith('"') or val.startswith("'")):
-                val = f'"{val}"'
-        elif cast in ("integer", "int"):
-            val = f"int({clean_expr_tokens(val)})"
-        elif cast in ("float", "decimal", "number"):
-            val = f"float({clean_expr_tokens(val)})"
-        elif cast in ("boolean", "bool"):
-            if val.lower() in ("true", "yes"):
-                val = "True"
-            elif val.lower() in ("false", "no"):
-                val = "False"
+    # Direction 2: save <var> as <val> [as <type>]
+    match_as = re.match(r'^(?:save|store|set)?\s*(.+?)\s+as\s+(.+?)(?:\s+as\s+(string|text|str|integer|int|number|float|decimal|boolean|bool|list|array|dict|dictionary|object|tuple|set))?$', chunk, re.IGNORECASE)
+    if match_as:
+        raw_var = match_as.group(1).strip()
+        val = match_as.group(2).strip()
+        cast = (match_as.group(3) or "").lower()
+        var = sanitize_var_name(raw_var)
+        return _format_typed_assignment(var, val, cast)
+
+    return None
+
+def parse_ask_command(line, indent):
+    """
+    Parses single or multi-input prompts in plain English:
+      'ask what is your name and what is your age and save in name as string and age as integer'
+      'ask what is second person name and age and save in name1 as string and age1 as integer'
+      'ask enter temperature and save as temp as float'
+    """
+    match = re.match(r'^ask\s+(.+?)\s+and\s+(?:save\s+in|save\s+as|store\s+in|store\s+as)\s+(.+)$', line, re.IGNORECASE)
+    if match:
+        raw_prompts = match.group(1).strip()
+        raw_vars = match.group(2).strip()
+
+        # Parse variables
+        var_chunks = re.split(r'\s+and\s+', raw_vars, flags=re.IGNORECASE)
+        var_list = []
+        for vc in var_chunks:
+            m = re.match(r'^([a-zA-Z_][\w\'’]*(?:\s+[a-zA-Z_]\w*)?)(?:\s+as\s+(string|text|str|integer|int|number|float|decimal|boolean|bool))?$', vc.strip(), re.IGNORECASE)
+            if m:
+                v_name = sanitize_var_name(m.group(1))
+                v_cast = (m.group(2) or "string").lower()
+                var_list.append((v_name, v_cast, m.group(1).strip()))
             else:
-                val = f"bool({clean_expr_tokens(val)})"
-        elif cast in ("list", "array"):
-            if not (val.startswith("[") and val.endswith("]")):
-                val = f"[{val}]"
-        elif cast in ("dict", "dictionary", "object"):
-            if not (val.startswith("{") and val.endswith("}")):
-                val = f"{{{val}}}"
-        elif cast == "tuple":
-            if not (val.startswith("(") and val.endswith(")")):
-                val = f"({val})"
-        elif cast == "set":
-            if not (val.startswith("{") and val.endswith("}")):
-                val = f"set([{val}])"
+                var_list.append((sanitize_var_name(vc), "string", vc.strip()))
 
-        return f"{var} = {val}"
+        # Parse prompts
+        prompt_chunks = []
+        if len(var_list) > 1:
+            parts = re.split(r'\s+and\s+', raw_prompts, flags=re.IGNORECASE)
+            if len(parts) == len(var_list):
+                first_match = re.match(r'^(what\s+is\s+(?:the\s+)?(?:second\s+person\s+|first\s+person\s+|user\s+|your\s+)?)', parts[0].strip(), re.IGNORECASE)
+                qualifier_prefix = first_match.group(1) if (first_match and first_match.group(1)) else "what is "
+                for idx, p in enumerate(parts):
+                    p_clean = p.strip()
+                    # Strip leading "what is", "your", "the", etc.
+                    p_clean = re.sub(r'^(?:what\s+is\s+)?(?:the\s+|second\s+person\s+|first\s+person\s+|user\s+|your\s+)?', '', p_clean, flags=re.IGNORECASE).strip()
+                    prompt_chunks.append(f"{qualifier_prefix}{p_clean}")
+            else:
+                base_match = re.match(r'^(what\s+is\s+(?:the\s+)?(?:second\s+person\s+|first\s+person\s+|user\s+|your\s+)?)(.*)$', raw_prompts, re.IGNORECASE)
+                if base_match:
+                    prefix = base_match.group(1).strip()
+                    for (v_name, v_cast, raw_v) in var_list:
+                        clean_label = re.sub(r'\d+$', '', raw_v).replace("_", " ")
+                        prompt_chunks.append(f"{prefix} {clean_label}")
+                else:
+                    for (v_name, v_cast, raw_v) in var_list:
+                        prompt_chunks.append(f"enter {raw_v}")
+        else:
+            prompt_chunks = [raw_prompts]
+
+        lines_out = []
+        for i, (v_name, v_cast, _) in enumerate(var_list):
+            p_text = prompt_chunks[i] if i < len(prompt_chunks) else f"enter {v_name}"
+            p_text = p_text.rstrip(" :?") + ": "
+            if v_cast in ("integer", "int"):
+                lines_out.append(f'{indent}{v_name} = int(ask_number("{p_text}"))')
+            elif v_cast in ("float", "decimal", "number"):
+                lines_out.append(f'{indent}{v_name} = float(ask_number("{p_text}"))')
+            elif v_cast in ("boolean", "bool"):
+                lines_out.append(f'{indent}{v_name} = ask_boolean("{p_text}")')
+            else:
+                lines_out.append(f'{indent}{v_name} = ask("{p_text}")')
+
+        return "\n".join(lines_out)
+
+    match_direct = re.match(r'^ask\s+(.+)$', line, re.IGNORECASE)
+    if match_direct:
+        p_text = match_direct.group(1).strip().rstrip(" :?") + ": "
+        return f'{indent}ask("{p_text}")'
+
     return None
 
 class SaidLangTranspiler:
@@ -187,7 +289,7 @@ class SaidLangTranspiler:
             return indent + line
 
         # -------------------------------------------------------------
-        # 1. Variable Assignments (save ... as ... as type [and ...])
+        # 1. Variable Assignments (save ... as / in ... as type [and ...])
         # -------------------------------------------------------------
         if re.match(r'^(?:save|store)\s+', line, re.IGNORECASE):
             body = re.sub(r'^(?:save|store)\s+', '', line, flags=re.IGNORECASE)
@@ -201,21 +303,12 @@ class SaidLangTranspiler:
                 return "\n".join(f"{indent}{a}" for a in py_assignments)
 
         # -------------------------------------------------------------
-        # 2. User Input Commands (ask ... and save as <var> as <type>)
+        # 2. User Input Commands (ask ... and save in / as ...)
         # -------------------------------------------------------------
-        match = re.match(r'^ask\s+(.+?)\s+and\s+save\s+as\s+(.+?)(?:\s+as\s+(string|text|str|integer|int|number|float|decimal|boolean|bool))?$', line, re.IGNORECASE)
-        if match:
-            prompt = match.group(1).strip()
-            raw_var = match.group(2).strip()
-            cast = (match.group(3) or "string").lower()
-            var = sanitize_var_name(raw_var)
-            if cast in ("integer", "int"):
-                return f'{indent}{var} = int(ask_number("{prompt}: "))'
-            elif cast in ("float", "decimal", "number"):
-                return f'{indent}{var} = float(ask_number("{prompt}: "))'
-            elif cast in ("boolean", "bool"):
-                return f'{indent}{var} = ask_boolean("{prompt}: ")'
-            return f'{indent}{var} = ask("{prompt}: ")'
+        if re.match(r'^ask\s+', line, re.IGNORECASE):
+            parsed_ask = parse_ask_command(line, indent)
+            if parsed_ask:
+                return parsed_ask
 
         # -------------------------------------------------------------
         # 3. Math & Calculations Trigger Rules:
@@ -423,12 +516,17 @@ class SaidLangTranspiler:
             return f"{indent}if {cond}:\n{indent}    {then_code}\n{indent}else:\n{indent}    {else_code}"
 
         # -------------------------------------------------------------
-        # 6. Natural Inline Repeat:
+        # 6. Natural Inline Repeat (supports dynamic variable or literal integer count):
         # -------------------------------------------------------------
-        match = re.match(r'^repeat\s+(.+?)\s+(\d+)\s+times$', line, re.IGNORECASE)
+        match = re.match(r'^repeat\s+(.+?)\s+(@?[a-zA-Z_][\w\'’]*|\d+)\s+times$', line, re.IGNORECASE)
         if match:
             action_text = match.group(1).strip()
-            count = match.group(2).strip()
+            count_token = match.group(2).strip()
+
+            if count_token.isdigit():
+                count_expr = count_token
+            else:
+                count_expr = sanitize_var_name(count_token)
 
             if action_text.lower().startswith("say ") or action_text.lower().startswith("show "):
                 content = re.sub(r'^(?:say|show)\s+', '', action_text, flags=re.IGNORECASE)
@@ -436,7 +534,7 @@ class SaidLangTranspiler:
             else:
                 sub_code = parse_natural_say(action_text)
 
-            return f"{indent}for _ in range({count}):\n{indent}    {sub_code}"
+            return f"{indent}for _ in range({count_expr}):\n{indent}    {sub_code}"
 
         # -------------------------------------------------------------
         # 7. Output Statements:

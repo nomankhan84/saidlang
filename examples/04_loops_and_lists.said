@@ -1,0 +1,17 @@
+# ==========================================
+# SaidLang Tutorial 04: Loops & Lists
+# ==========================================
+
+show "--- Repeat Loop ---"
+repeat 3 times:
+    show "SaidLang makes programming easy!"
+
+show "--- Counting Loop ---"
+count from 1 to 5 as num:
+    show num
+
+show "--- Iterating Over a List ---"
+set fruits to ["Apple", "Banana", "Orange", "Mango"]
+
+for each fruit in fruits:
+    show fruit
